@@ -34,6 +34,7 @@ page 51001 xts_BuktiBankKeluarDocument
                 field(BankName; BankName)
                 {
                     ApplicationArea = All;
+                    Importance = Promoted;
                 }
 
                 field(ShortcutDimension1Code; ShortcutDimension1Code)
@@ -48,10 +49,12 @@ page 51001 xts_BuktiBankKeluarDocument
                 field(Status; Status)
                 {
                     ApplicationArea = All;
+                    Importance = Promoted;
                 }
                 field(TotalAmount; TotalAmount)
                 {
                     ApplicationArea = All;
+                    Importance = Promoted;
                 }
             }
             part(Lines; xts_BuktiBankKeluarSubPage)
