@@ -1,4 +1,3 @@
-// nama table
 table 51000 xts_BuktiBankKeluarHeader
 {
     DataClassification = CustomerContent;
@@ -10,6 +9,15 @@ table 51000 xts_BuktiBankKeluarHeader
         {
             DataClassification = CustomerContent;
             Caption = 'No.';
+
+            trigger OnValidate()
+            begin
+                if No <> xRec.No then begin
+                    PurchSetup.Get;
+                    NoSeriesMgt.TestManual(PurchSetup.BuktiBankKeluarNos);
+                    NoSeries := '';
+                end;
+            end;
         }
         field(2; NoSeries; Code[10])
         {
@@ -30,6 +38,17 @@ table 51000 xts_BuktiBankKeluarHeader
         {
             Caption = 'Bank No.';
             DataClassification = CustomerContent;
+            TableRelation = "Bank Account";
+
+            trigger OnValidate()
+            var
+                BankAcc: Record "Bank Account";
+            begin
+                if BankNo <> '' then begin
+                    BankAcc.Get(BankNo);
+                    BankName := BankAcc.Name;
+                end;
+            end;
         }
         field(6; BankName; Text[50])
         {
@@ -53,9 +72,10 @@ table 51000 xts_BuktiBankKeluarHeader
             Caption = 'Dimension Set ID';
             DataClassification = CustomerContent;
         }
-        field(11; Status; Enum xts_BuktiBankDocumentStatus)
+        field(11; Status; Enum "Purchase Document Status")
         {
             DataClassification = CustomerContent;
+            Editable = false; // bikin jadi readonly
         }
         field(12; TotalAmount; Decimal)
         {
@@ -75,4 +95,35 @@ table 51000 xts_BuktiBankKeluarHeader
             Clustered = true;
         }
     }
+
+    var
+        PurchSetup: Record "Purchases & Payables Setup";
+        NoSeriesMgt: Codeunit NoSeriesManagement;
+
+    trigger OnInsert()
+    begin
+        DocumentDate := WorkDate();
+
+        if No = '' then begin
+            PurchSetup.Get;
+            PurchSetup.TestField(BuktiBankKeluarNos);
+            NoSeriesMgt.InitSeries(PurchSetup.BuktiBankKeluarNos, xRec.NoSeries, DocumentDate, No, NoSeries);
+        end;
+    end;
+
+    procedure AssistEdit(OldBbk: Record xts_BuktiBankKeluarHeader): Boolean
+    var
+        bbk: Record xts_BuktiBankKeluarHeader;
+    begin
+        with bbk do begin
+            bbk := Rec;
+            PurchSetup.Get;
+            PurchSetup.TestField(BuktiBankKeluarNos);
+            if NoSeriesMgt.SelectSeries(PurchSetup.BuktiBankKeluarNos, OldBbk.NoSeries, NoSeries) then begin
+                NoSeriesMgt.SetSeries(No);
+                Rec := bbk;
+                exit(true);
+            end;
+        end;
+    end;
 }

@@ -14,6 +14,12 @@ page 51001 xts_BuktiBankKeluarDocument
                 field(No; No)
                 {
                     ApplicationArea = All;
+                    AssistEdit = true;
+
+                    trigger OnAssistEdit()
+                    begin
+                        AssistEdit(xRec);
+                    end;
                 }
                 field(DocumentDate; DocumentDate)
                 {

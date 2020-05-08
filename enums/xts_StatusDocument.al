@@ -1,4 +1,4 @@
-enum 50000 xts_BuktiBankDocumentStatus
+enum 51000 xts_BuktiBankDocumentStatus
 {
     Extensible = true;
 
